@@ -1,0 +1,47 @@
+This breakdown outlines the exact progression of your project. The advice you received is spot on: **Version 1** gets you a functional tool quickly, **Version 2** introduces the concept of embeddings you were asking about, and **Version 3** turns it into an advanced machine learning project.
+
+Here is the direct comparison of the three versions across their architecture, chess intelligence, complexity, and unique value.
+
+---
+
+## 📊 Quick Comparison Table
+
+| Feature | Version 1: The Fast Baseline | Version 2: The Embedding Upgrade | Version 3: The Mini-Transformer |
+| --- | --- | --- | --- |
+| **Input Format** | A list of 64 integers (e.g., `[1, 0, 0, 12...]`) | A matrix of token IDs mapped to learned vectors | Token IDs + Attention mechanism |
+| **Chess Intelligence** | Basic pattern matching (looks at the board as a flat image). | Conceptual matching (understands piece types share properties). | Spatial matching (understands piece relationships across the board). |
+| **Elo Level Estimate** | 600–800 Elo (blunders less, plays basic tactical moves) | 800–1000 Elo (smoother positional play) | 1000–1200+ Elo (can plan long-range attacks/tactics) |
+| **Novelty / Cool Factor** | Low (standard university-level introductory project) | Medium (shows understanding of representation learning) | High (modern, mini-LLM style architecture applied to chess) |
+
+---
+
+## 🔍 Deep Dive: V1 vs. V2 vs. V3
+
+### 🧱 Version 1: The Flat Feed-Forward Network
+
+* **What it is:** You flatten the 64 squares of the chess board into 64 continuous input numbers (0 for empty, 1 for White Pawn, etc.) and feed them straight into standard dense layers (`nn.Linear`).
+* **Chess Intelligence & Behavior:** It treats the board like a fixed grid. It will learn basic spatial configurations (e.g., "If there is a 1 on square 12 and a 12 on square 20, move X is often good"). However, it treats a White Knight (`2`) and a Black King (`12`) purely as arbitrary numbers. It doesn't inherently know that a Knight moves differently or that two different pieces are both "Knights".
+* **Primary Use:** A quick, working baseline. It proves your data pipeline (PGN parsing, Parquet saving, training loop) actually works without complex bugs.
+* **Why it's good for Goal A:** It is the fastest route to a move-generator that can play a cohesive game of chess at a beginner level.
+
+### 💎 Version 2: The Embedding Upgrade
+
+* **What it is:** Instead of passing the raw numbers `0` to `12` directly into the network, you insert the `nn.Embedding` layer we discussed earlier. Every piece type gets converted into a dense vector (e.g., a vector of 16 or 32 numbers) that changes and updates during training.
+* **Chess Intelligence & Behavior:** The model develops a primitive "understanding" of piece identities. During training, the vector for a White Knight and a Black Knight will naturally be driven to share similar geometric traits because they share similar movement capabilities, while an empty square vector will look entirely different.
+* **Primary Use:** Cleaner generalization. If the model sees a board state it has never encountered before, its understanding of "what a piece is" allows it to make a much smarter guess than Version 1.
+* **Novelty:** Introduces representation learning. You can pull the weights out of the embedding layer, plot them on a graph, and visually see PyTorch grouping similar pieces together.
+
+### 🧠 Version 3: The Mini-Transformer (Attention Engine)
+
+* **What it is:** You take the embeddings from Version 2 and pass them through a couple of **Self-Attention layers** (like a tiny version of GPT).
+* **Chess Intelligence & Behavior:** This is where true chess geometry emerges. Version 1 and 2 look at squares in isolation. Version 3's attention mechanism allows the pieces to "talk" to each other across the board. A Bishop on `c1` can actively calculate a relationship with a King on `g8` down an open diagonal. It learns pins, forks, discovered checks, and structural weaknesses.
+* **Primary Use:** High-tier move prediction and deep positional evaluation. It allows you to build features like a "similarity search" (e.g., finding historical Grandmaster games that share a similar latent strategic vibe to your current game).
+* **Why it's good for Goal B:** It is an incredibly impressive ML project. It transitions from a simple calculator to an engine that maps the abstract "meaning" of a chess position.
+
+---
+
+## 🎯 Which route should you actually take?
+
+If you want to keep your sanity and ensure success, **build them sequentially.**
+
+Do not try to jump straight to Version 3. Write the code for **Version 1** first to ensure your data loads properly and your model outputs valid moves. Once that works, it takes less than 5 lines of code to swap the input layer for an `nn.Embedding` and turn it into **Version 2**. Only when you are completely comfortable with that behavior should you experiment with adding attention layers for **Version 3**.
